@@ -1,0 +1,27 @@
+services:
+  challenge:
+    build: .
+    image: devops-ctf/sshd-is-not-running:latest
+    container_name: devops-ctf-6cb647b2
+    hostname: challenge
+    ports:
+      - "${HOST_PORT:-18039}:80"
+    volumes:
+      - ./config:/opt/challenge-config
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+      - CHALLENGE_ID=6cb647b2-90fe-4c81-a1f6-702d1b773e0c
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    command: ["/entrypoint.sh"]
+
+  checker:
+    image: devops-ctf-checker:latest
+    volumes:
+      - ./checker/rules.yaml:/checker/rules.yaml:ro
+      - ./config:/data:ro
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+    profiles: ["checker"]
+    command: ["python3", "/checker/run.py"]

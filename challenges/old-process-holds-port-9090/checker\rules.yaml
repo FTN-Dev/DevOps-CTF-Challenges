@@ -1,0 +1,17 @@
+challenge_id: "f69f67b4-15b4-42ed-9b6c-88f5bf97cde7"
+title: "Old process holds port 9090"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

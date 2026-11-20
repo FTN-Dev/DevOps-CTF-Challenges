@@ -1,0 +1,27 @@
+services:
+  challenge:
+    build: .
+    image: devops-ctf/firewall-memblokir-traffic:latest
+    container_name: devops-ctf-4236c122
+    hostname: challenge
+    ports:
+      - "${HOST_PORT:-18088}:80"
+    volumes:
+      - ./config:/opt/challenge-config
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+      - CHALLENGE_ID=4236c122-7761-4ab4-a9a9-8dc9c63c52e5
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    command: ["/entrypoint.sh"]
+
+  checker:
+    image: devops-ctf-checker:latest
+    volumes:
+      - ./checker/rules.yaml:/checker/rules.yaml:ro
+      - ./config:/data:ro
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+    profiles: ["checker"]
+    command: ["python3", "/checker/run.py"]

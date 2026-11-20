@@ -1,0 +1,17 @@
+challenge_id: "447b71a2-21e3-4e08-a75e-e9fa4dba0f6d"
+title: "Wrong token in env"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

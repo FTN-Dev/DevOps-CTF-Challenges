@@ -1,0 +1,17 @@
+challenge_id: "66e19c75-b5f8-4f7e-a8ba-e307629dd5dd"
+title: "Schedule user cannot execute script"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

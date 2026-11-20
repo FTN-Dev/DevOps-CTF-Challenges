@@ -1,0 +1,19 @@
+challenge_id: "database-engine-not-listening"
+title: "Database Engine Not Listening"
+
+checks:
+  - id: postgres_running
+    type: process
+    name: "postgres"
+    should_exist: true
+    message: "PostgreSQL is not running"
+  - id: postgres_listening
+    type: command
+    cmd: "pg_isready -h /var/run/postgresql"
+    expect_exit_code: 0
+    message: "PostgreSQL not accepting connections"
+  - id: select_one
+    type: command
+    cmd: "su postgres -c \"psql -c 'SELECT 1;'\" 2>&1"
+    expect_stdout_contains: "1"
+    message: "SELECT 1 failed"

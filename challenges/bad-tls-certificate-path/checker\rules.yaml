@@ -1,0 +1,14 @@
+challenge_id: "7d2d2c52-c34a-4d3e-bbbb-c2c53f2403b6"
+title: "Bad TLS certificate path"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

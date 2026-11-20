@@ -1,0 +1,17 @@
+challenge_id: "f601f1c7-a9e9-42b1-8b7b-64cf2869267f"
+title: "Cicd Stale Artifact And Token"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

@@ -1,0 +1,27 @@
+services:
+  challenge:
+    build: .
+    image: devops-ctf/nginx-upstream-port-and-app-token:latest
+    container_name: devops-ctf-8ce07f7f
+    hostname: challenge
+    ports:
+      - "${HOST_PORT:-18006}:80"
+    volumes:
+      - ./config:/opt/challenge-config
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+      - CHALLENGE_ID=8ce07f7f-e470-4114-9630-01de8c53e2f1
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    command: ["/entrypoint.sh"]
+
+  checker:
+    image: devops-ctf-checker:latest
+    volumes:
+      - ./checker/rules.yaml:/checker/rules.yaml:ro
+      - ./config:/data:ro
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+    profiles: ["checker"]
+    command: ["python3", "/checker/run.py"]

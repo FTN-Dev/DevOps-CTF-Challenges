@@ -1,0 +1,14 @@
+challenge_id: "587042dd-270c-45d3-88af-bc426214d22a"
+title: "Stale nginx pid blocks healthy start"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

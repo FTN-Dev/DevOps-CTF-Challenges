@@ -1,0 +1,27 @@
+services:
+  challenge:
+    build: .
+    image: devops-ctf/location-forces-404:latest
+    container_name: devops-ctf-0b8ea58c
+    hostname: challenge
+    ports:
+      - "${HOST_PORT:-18080}:80"
+    volumes:
+      - ./config:/opt/challenge-config
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+      - CHALLENGE_ID=0b8ea58c-2043-4d26-9cb5-81943479994a
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    command: ["/entrypoint.sh"]
+
+  checker:
+    image: devops-ctf-checker:latest
+    volumes:
+      - ./checker/rules.yaml:/checker/rules.yaml:ro
+      - ./config:/data:ro
+    environment:
+      - CHECKER_ENABLED=${CHECKER_ENABLED:-true}
+    profiles: ["checker"]
+    command: ["python3", "/checker/run.py"]

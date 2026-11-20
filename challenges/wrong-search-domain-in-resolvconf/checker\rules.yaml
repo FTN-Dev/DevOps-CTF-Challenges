@@ -1,0 +1,15 @@
+challenge_id: "93e76eda-2710-49ee-8850-250b5b0e5d45"
+title: "Wrong search domain in resolv.conf"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

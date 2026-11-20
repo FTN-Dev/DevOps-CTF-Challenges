@@ -1,0 +1,17 @@
+challenge_id: "466d2cf1-a00d-4776-9875-10a400654a88"
+title: "Schedule path with spaces unquoted"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

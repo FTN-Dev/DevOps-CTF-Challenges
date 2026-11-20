@@ -1,0 +1,14 @@
+challenge_id: "d76fa843-0a72-4126-899e-05bafd400534"
+title: "Basic auth password file wrong"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

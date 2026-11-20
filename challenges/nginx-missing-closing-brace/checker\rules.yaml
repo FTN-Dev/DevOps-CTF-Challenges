@@ -1,0 +1,14 @@
+challenge_id: "0fe41063-acc2-465c-9767-456b4288deaf"
+title: "Nginx missing closing brace"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

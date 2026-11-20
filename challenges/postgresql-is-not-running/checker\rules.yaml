@@ -1,0 +1,15 @@
+challenge_id: "c615848b-3cb8-454e-afc8-b1476bbfb3a4"
+title: "PostgreSQL is not running"
+
+allowed_files:
+  - "/etc/postgresql/*/main/pg_hba.conf"
+  - "/etc/postgresql/*/main/postgresql.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "pg_isready -h localhost"
+    expect_stdout: "accepting connections"
+    message: "postgres not ready"

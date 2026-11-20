@@ -1,0 +1,15 @@
+challenge_id: "bd0ffb69-a195-4ecc-a848-93083712e08e"
+title: "App DB port and pg_hba"
+
+allowed_files:
+  - "/etc/postgresql/*/main/pg_hba.conf"
+  - "/etc/postgresql/*/main/postgresql.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "pg_isready -h localhost"
+    expect_stdout: "accepting connections"
+    message: "postgres not ready"

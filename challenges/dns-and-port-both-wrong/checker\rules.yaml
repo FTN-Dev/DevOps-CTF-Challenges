@@ -1,0 +1,15 @@
+challenge_id: "ace2cb46-c702-4129-9442-37460e27cf7c"
+title: "DNS and port both wrong"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

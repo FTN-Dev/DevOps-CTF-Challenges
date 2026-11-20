@@ -1,0 +1,14 @@
+challenge_id: "e6a26cde-38e2-4464-a0c1-ff2ad9bed3c4"
+title: "proxy_pass hostname without DNS"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

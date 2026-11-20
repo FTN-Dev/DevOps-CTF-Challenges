@@ -1,0 +1,26 @@
+challenge_id: "8ce07f7f-e470-4114-9630-01de8c53e2f1"
+title: "Nginx upstream port and app token"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files:
+  - path: "/opt/challenge-config/app.py"
+    sha256: "9574ee13b3a0225a955f49a4b4db9fffff5b85bccd0cd3fb6d630362d11c6e8c"
+
+checks:
+  - id: nginx_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "nginx proxy ke upstream gagal (502/504)"
+  - id: app_health
+    type: http
+    url: "http://localhost:8080/"
+    expect_status: 200
+    message: "app tidak sehat di port 8080"
+  - id: correct_upstream_port
+    type: grep
+    file: "/etc/nginx/sites-enabled/default"
+    pattern: "proxy_pass http://127.0.0.1:8080"
+    message: "upstream port salah (harus 8080)"

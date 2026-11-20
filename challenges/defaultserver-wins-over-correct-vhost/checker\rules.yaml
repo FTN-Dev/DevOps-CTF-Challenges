@@ -1,0 +1,14 @@
+challenge_id: "45dc4d98-fa04-4a8b-9d01-234aabd12e78"
+title: "default_server wins over correct vhost"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

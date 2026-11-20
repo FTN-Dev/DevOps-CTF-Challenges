@@ -1,0 +1,14 @@
+challenge_id: "b0032c66-1dc6-408f-b867-c34241c8e426"
+title: "proxy_set_header Host causes upstream 404"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

@@ -1,0 +1,15 @@
+challenge_id: "87bf1c45-2442-4c08-bfe3-17eacef77655"
+title: "Blackhole nameserver listed first"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

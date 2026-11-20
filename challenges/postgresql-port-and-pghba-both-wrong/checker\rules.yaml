@@ -1,0 +1,15 @@
+challenge_id: "7309bd32-4ac4-4a98-b6dc-db714a3c23dd"
+title: "PostgreSQL port and pg_hba both wrong"
+
+allowed_files:
+  - "/etc/postgresql/*/main/pg_hba.conf"
+  - "/etc/postgresql/*/main/postgresql.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "pg_isready -h localhost"
+    expect_stdout: "accepting connections"
+    message: "postgres not ready"

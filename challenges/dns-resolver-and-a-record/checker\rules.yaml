@@ -1,0 +1,15 @@
+challenge_id: "b75c9b3f-4b54-41d5-a1c8-411dfbb397b6"
+title: "DNS resolver and A record"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

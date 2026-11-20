@@ -1,0 +1,14 @@
+challenge_id: "3064aaa4-b26f-402d-89ab-a577500b27f6"
+title: "Static OK, /health proxies to dead port"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

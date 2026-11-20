@@ -1,0 +1,14 @@
+challenge_id: "aeaa2511-7b0c-4c5a-b494-2c4956a89d08"
+title: "Empty index.html"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

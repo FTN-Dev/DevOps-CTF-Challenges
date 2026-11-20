@@ -1,0 +1,19 @@
+challenge_id: "web-server-refuses-to-start"
+title: "Web Server Refuses to Start"
+
+checks:
+  - id: nginx_syntax_ok
+    type: command
+    cmd: "nginx -t 2>&1"
+    expect_stdout_contains: "syntax is ok"
+    message: "Nginx configuration has syntax errors"
+  - id: nginx_running
+    type: process
+    name: "nginx"
+    should_exist: true
+    message: "Nginx is not running"
+  - id: http_responds
+    type: http
+    url: "http://localhost:80/"
+    expect_status: 200
+    message: "Web server not responding on port 80"

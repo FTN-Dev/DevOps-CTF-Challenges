@@ -1,0 +1,17 @@
+challenge_id: "b53b6dcd-5f7e-47c4-ab94-d1798049ea4a"
+title: "Proses Zombie Bikin Server Lemot"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

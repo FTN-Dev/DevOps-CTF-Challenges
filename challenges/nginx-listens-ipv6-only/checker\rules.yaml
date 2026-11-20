@@ -1,0 +1,14 @@
+challenge_id: "aa97d56e-a76d-46d7-83ab-80a10ec9386c"
+title: "Nginx listens IPv6 only"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

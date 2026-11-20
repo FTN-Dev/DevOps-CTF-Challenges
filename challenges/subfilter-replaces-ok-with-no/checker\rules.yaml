@@ -1,0 +1,14 @@
+challenge_id: "4d7f0e30-ec4c-408a-a474-8b2cfcdc67f7"
+title: "sub_filter replaces OK with NO"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

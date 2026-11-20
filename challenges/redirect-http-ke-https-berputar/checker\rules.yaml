@@ -1,0 +1,17 @@
+challenge_id: "b47ebbe6-8d3c-46db-b3cb-798a826c3975"
+title: "Redirect HTTP ke HTTPS Berputar"
+
+allowed_files: []
+# TODO: daftar file yang boleh diubah user
+
+forbidden_files: []
+# TODO: daftar file yang dilarang diubah (path + sha256 baseline)
+
+checks: []
+# TODO: tambahkan checks spesifik challenge ini
+# Contoh:
+# - id: service_health
+#   type: http
+#   url: "http://localhost:80/health"
+#   expect_status: 200
+#   message: "service not healthy"

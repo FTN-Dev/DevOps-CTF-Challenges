@@ -1,0 +1,15 @@
+challenge_id: "e34f11ad-bede-4261-96e5-c2881ba4b4ae"
+title: "Wrong database name and role password"
+
+allowed_files:
+  - "/etc/postgresql/*/main/pg_hba.conf"
+  - "/etc/postgresql/*/main/postgresql.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "pg_isready -h localhost"
+    expect_stdout: "accepting connections"
+    message: "postgres not ready"

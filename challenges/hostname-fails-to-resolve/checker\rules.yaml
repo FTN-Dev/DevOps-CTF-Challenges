@@ -1,0 +1,14 @@
+challenge_id: "hostname-fails-to-resolve"
+title: "Hostname Fails to Resolve"
+
+checks:
+  - id: resolv_conf_correct
+    type: command
+    cmd: "grep -q 'nameserver 127.0.0.1' /etc/resolv.conf && echo OK"
+    expect_stdout_contains: "OK"
+    message: "resolv.conf has wrong nameserver"
+  - id: dns_resolves
+    type: command
+    cmd: "getent hosts api.internal 2>/dev/null || dig +short api.internal @127.0.0.1"
+    expect_exit_code: 0
+    message: "api.internal does not resolve"

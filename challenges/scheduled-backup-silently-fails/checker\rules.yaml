@@ -1,0 +1,19 @@
+challenge_id: "scheduled-backup-silently-fails"
+title: "Scheduled Backup Silently Fails"
+
+checks:
+  - id: backup_output_exists
+    type: command
+    cmd: "test -f /opt/backup/output/*.tar.gz && echo OK"
+    expect_stdout_contains: "OK"
+    message: "No backup archive found in /opt/backup/output/"
+  - id: cron_file_has_newline
+    type: command
+    cmd: "tail -c 1 /etc/cron.d/backup-job | xxd | grep -q '0a' && echo OK"
+    expect_stdout_contains: "OK"
+    message: "Cron file missing trailing newline"
+  - id: backup_script_runs
+    type: command
+    cmd: "bash /opt/backup/backup.sh && ls /opt/backup/output/*.tar.gz | wc -l"
+    expect_exit_code: 0
+    message: "Backup script failed to run"

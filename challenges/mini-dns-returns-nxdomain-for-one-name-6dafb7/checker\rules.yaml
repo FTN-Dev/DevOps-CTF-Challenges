@@ -1,0 +1,15 @@
+challenge_id: "6dafb786-fd1a-43d6-841a-318636f5beb9"
+title: "Mini DNS returns NXDOMAIN for one name"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

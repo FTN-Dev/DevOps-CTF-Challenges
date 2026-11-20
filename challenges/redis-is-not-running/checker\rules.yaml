@@ -1,0 +1,14 @@
+challenge_id: "ab957fcd-5622-4365-9de5-449ee56171b6"
+title: "Redis is not running"
+
+allowed_files:
+  - "/etc/redis/redis.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "redis-cli ping"
+    expect_stdout: "PONG"
+    message: "redis not responding"

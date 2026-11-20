@@ -1,0 +1,14 @@
+challenge_id: "c0d10ac2-d747-4e08-921c-efac971c33de"
+title: "Nginx pid directory missing"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

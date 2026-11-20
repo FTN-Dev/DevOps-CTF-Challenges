@@ -1,0 +1,14 @@
+challenge_id: "cache-daemon-not-responding"
+title: "Cache Daemon Not Responding"
+
+checks:
+  - id: redis_running
+    type: process
+    name: "redis"
+    should_exist: true
+    message: "Redis is not running"
+  - id: redis_ping
+    type: command
+    cmd: "redis-cli PING"
+    expect_stdout_contains: "PONG"
+    message: "Redis PING failed"

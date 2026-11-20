@@ -1,0 +1,14 @@
+challenge_id: "be5a3d96-c78b-4be1-a198-c92f3c7c3157"
+title: "App Redis port and password"
+
+allowed_files:
+  - "/etc/redis/redis.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "redis-cli ping"
+    expect_stdout: "PONG"
+    message: "redis not responding"

@@ -1,0 +1,14 @@
+challenge_id: "a6f29313-9ae7-4d59-aaf1-82502f4dca3b"
+title: "HTTPS redirect loop"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

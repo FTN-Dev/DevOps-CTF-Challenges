@@ -1,0 +1,37 @@
+challenge_id: "ff3933c8-c4d0-4efb-8611-f7156123939d"
+title: "Python keeps phoning home"
+
+allowed_files:
+  - "/usr/lib/python3/dist-packages/sitecustomize.py"
+  - "/usr/lib/python3/dist-packages/beacon.pth"
+
+forbidden_files:
+  - path: "/opt/billing-api/billing_api.py"
+    sha256: "e62a6888929703e104d8283bcefcef002da8089285597bd10037e497ed858708"
+  - path: "/opt/billing-api/helper.py"
+    sha256: "69794a4ef09090dc76d4e796ee7f9a69da0d164213f4827b8ef84ee74682b82e"
+
+checks:
+  - id: no_beacon_process
+    type: process
+    name: "[c]ollector.py"
+    should_run: false
+    message: "Beacon process masih berjalan"
+  - id: no_sitecustomize
+    type: file_absent
+    path: "/usr/lib/python3/dist-packages/sitecustomize.py"
+    message: "sitecustomize.py persistence masih ada"
+  - id: no_beacon_pth
+    type: file_absent
+    path: "/usr/lib/python3/dist-packages/beacon.pth"
+    message: "beacon.pth persistence masih ada"
+  - id: billing_health
+    type: http
+    url: "http://localhost:8080/health"
+    expect_status: 200
+    message: "billing-api tidak sehat"
+  - id: helper_import
+    type: command
+    cmd: "python3 -c 'import sys; sys.path.insert(0,\"/opt/billing-api\"); import helper; print(helper.health()[\"status\"])'"
+    expect_stdout: "ok"
+    message: "helper library rusak"

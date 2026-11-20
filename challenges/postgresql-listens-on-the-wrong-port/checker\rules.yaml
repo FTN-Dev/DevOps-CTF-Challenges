@@ -1,0 +1,15 @@
+challenge_id: "39f80654-4969-4f20-9da4-eeda342f6aec"
+title: "PostgreSQL listens on the wrong port"
+
+allowed_files:
+  - "/etc/postgresql/*/main/pg_hba.conf"
+  - "/etc/postgresql/*/main/postgresql.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "pg_isready -h localhost"
+    expect_stdout: "accepting connections"
+    message: "postgres not ready"

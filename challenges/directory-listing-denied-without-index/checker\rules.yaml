@@ -1,0 +1,14 @@
+challenge_id: "79cb28a8-959c-451f-8e55-ec63f6e690da"
+title: "Directory listing denied without index"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

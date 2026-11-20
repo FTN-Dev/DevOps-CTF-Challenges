@@ -1,0 +1,15 @@
+challenge_id: "9591dec3-9ff7-4908-b904-60e00f5f56ca"
+title: "DNS resolver pointed at a blackhole"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

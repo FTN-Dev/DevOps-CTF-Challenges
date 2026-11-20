@@ -1,0 +1,14 @@
+challenge_id: "8e710263-c0e4-4276-bbb0-425159d466e5"
+title: "Redis password and DB index mismatch"
+
+allowed_files:
+  - "/etc/redis/redis.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "redis-cli ping"
+    expect_stdout: "PONG"
+    message: "redis not responding"

@@ -1,0 +1,14 @@
+challenge_id: "1cf5d1b4-cbd9-486d-96f3-a637ff30010d"
+title: "try_files missing $uri"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

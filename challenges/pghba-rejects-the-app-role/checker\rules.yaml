@@ -1,0 +1,15 @@
+challenge_id: "dd215d6a-5fe6-47a2-a2dd-d08e13459430"
+title: "pg_hba rejects the app role"
+
+allowed_files:
+  - "/etc/postgresql/*/main/pg_hba.conf"
+  - "/etc/postgresql/*/main/postgresql.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "pg_isready -h localhost"
+    expect_stdout: "accepting connections"
+    message: "postgres not ready"

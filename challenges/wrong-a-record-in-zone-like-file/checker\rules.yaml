@@ -1,0 +1,15 @@
+challenge_id: "4441a28b-6296-4c8a-b5c5-b4b69e7978e5"
+title: "Wrong A record in zone-like file"
+
+allowed_files:
+  - "/etc/resolv.conf"
+  - "/etc/hosts"
+
+forbidden_files: []
+
+checks:
+  - id: dns_resolve
+    type: command
+    cmd: "dig @127.0.0.1 localhost +short | head -1"
+    expect_stdout: ""
+    message: "dns not resolving"

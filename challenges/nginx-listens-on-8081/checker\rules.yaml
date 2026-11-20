@@ -1,0 +1,14 @@
+challenge_id: "230ce2c8-d713-4594-a083-48519b14e2f6"
+title: "Nginx listens on 8081"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

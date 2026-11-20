@@ -1,0 +1,14 @@
+challenge_id: "8bbb0752-facf-402c-aed0-a2a98175a71d"
+title: "limit_req zone too strict"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

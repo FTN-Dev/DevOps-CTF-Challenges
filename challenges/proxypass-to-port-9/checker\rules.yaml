@@ -1,0 +1,14 @@
+challenge_id: "7c68523a-0fb5-4b9e-9e01-4e6cda7b03e0"
+title: "proxy_pass to port 9"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

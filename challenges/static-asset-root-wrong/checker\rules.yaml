@@ -1,0 +1,14 @@
+challenge_id: "d2b70982-282a-4656-b3ec-df02fb1237b7"
+title: "Static asset root wrong"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

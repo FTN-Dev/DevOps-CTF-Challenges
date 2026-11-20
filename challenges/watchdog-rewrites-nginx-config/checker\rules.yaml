@@ -1,0 +1,14 @@
+challenge_id: "6796af9e-3137-43a9-a121-88c8a68b145b"
+title: "Watchdog rewrites nginx config"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"

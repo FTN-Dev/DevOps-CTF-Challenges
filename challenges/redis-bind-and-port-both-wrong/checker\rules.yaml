@@ -1,0 +1,14 @@
+challenge_id: "6ff0a9f4-95b6-4fcb-a627-33f4b433c400"
+title: "Redis bind and port both wrong"
+
+allowed_files:
+  - "/etc/redis/redis.conf"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: command
+    cmd: "redis-cli ping"
+    expect_stdout: "PONG"
+    message: "redis not responding"

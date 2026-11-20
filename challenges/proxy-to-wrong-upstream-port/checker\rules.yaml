@@ -1,0 +1,14 @@
+challenge_id: "c4a73aac-6924-4423-b8fb-d20b1e822071"
+title: "Proxy to wrong upstream port"
+
+allowed_files:
+  - "/etc/nginx/sites-enabled/default"
+
+forbidden_files: []
+
+checks:
+  - id: service_health
+    type: http
+    url: "http://localhost:80/health"
+    expect_status: 200
+    message: "service not healthy"
