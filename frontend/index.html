@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DevOps CTF - Local Practice</title>
+<link rel="stylesheet" href="/lib/xterm.css">
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --panel2:#1c2128; --border:#30363d; --accent:#58a6ff; --text:#c9d1d9; --muted:#8b949e; --green:#3fb950; --yellow:#d29922; --red:#f85149; --cyan:#39c5cf; --purple:#bc8cff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  header { padding:10px 18px; background:var(--panel); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; }
+  header h1 { margin:0; font-size:17px; color:var(--accent); font-weight:700; }
+  header .sub { font-size:12px; color:var(--muted); }
+  header .status { font-size:12px; color:var(--muted); margin-left:auto; }
+  header .back { background:var(--panel2); color:var(--text); border:1px solid var(--border); padding:6px 12px; border-radius:5px; cursor:pointer; font-size:13px; }
+  header .back:hover { border-color:var(--accent); }
+
+  /* Page 1: Browser */
+  .browser { flex:1; display:flex; flex-direction:column; min-height:0; }
+  .filters { padding:12px 18px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; background:var(--panel); }
+  .filters .row { display:flex; gap:6px; flex-wrap:wrap; }
+  .filters input, .filters select { background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:5px; padding:7px 9px; font-size:13px; }
+  .filters input { flex:1; min-width:180px; }
+  .count { font-size:12px; color:var(--muted); padding:8px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; background:var(--panel); }
+  .grid { flex:1; overflow:auto; padding:18px; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; align-content:start; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px; cursor:pointer; transition:all .15s; }
+  .card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.3); }
+  .card .title { font-weight:600; font-size:14px; line-height:1.3; margin-bottom:8px; }
+  .card .meta { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px; }
+  .card .topics { font-size:11px; color:var(--muted); }
+  .card .status-row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+
+  /* Page 2: Workspace */
+  .workspace { flex:1; display:flex; min-height:0; }
+  .ws-left { flex:1; display:flex; flex-direction:column; min-width:0; border-right:1px solid var(--border); }
+  .terminal-wrap { flex:1; min-height:0; background:#000; position:relative; }
+  #terminal { height:100%; width:100%; }
+  .actions { padding:10px 14px; border-top:1px solid var(--border); display:flex; gap:6px; flex-wrap:wrap; align-items:center; background:var(--panel); }
+  .checker-toggle { display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12px; color:var(--muted); }
+  .toggle { width:36px; height:20px; background:var(--border); border-radius:10px; position:relative; cursor:pointer; transition:background .2s; }
+  .toggle.on { background:var(--green); }
+  .toggle::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; }
+  .toggle.on::after { left:18px; }
+  .stats-bar { padding:6px 14px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); display:flex; gap:14px; flex-wrap:wrap; background:var(--panel); }
+  .stats-bar b { color:var(--text); }
+  .ws-right { width:380px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--border); }
+  .sidebar-scroll { flex:1; overflow:auto; padding:16px; }
+  .sidebar-scroll h2 { margin:0 0 8px; font-size:17px; color:var(--accent); }
+  .meta { font-size:12px; color:var(--muted); margin-bottom:10px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .topics { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+  .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-top:12px; margin-bottom:4px; font-weight:600; }
+  .text { font-size:13px; line-height:1.6; white-space:pre-wrap; }
+  .accordion { border:1px solid var(--border); border-radius:6px; margin-top:8px; overflow:hidden; }
+  .acc-header { padding:8px 12px; background:var(--panel2); cursor:pointer; font-size:12px; font-weight:600; display:flex; justify-content:space-between; user-select:none; }
+  .acc-header:hover { background:#232932; }
+  .acc-body { padding:10px 12px; font-size:13px; line-height:1.6; white-space:pre-wrap; display:none; }
+  .acc-body.open { display:block; }
+  .allowed { color:var(--green); }
+  .forbidden { color:var(--red); }
+
+  /* chips */
+  .chip { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; background:#21262d; color:var(--muted); border:1px solid var(--border); }
+  .chip.level-beginner { background:#13291f; color:var(--green); border-color:#1f4a33; }
+  .chip.level-intermediate { background:#2a2314; color:var(--yellow); border-color:#4a3a1f; }
+  .chip.level-advanced { background:#2a1414; color:var(--red); border-color:#4a1f1f; }
+  .chip.kind { color:var(--cyan); border-color:#1f3a4a; background:#132329; }
+  .chip.image { background:#13291f; color:var(--green); border-color:#1f4a33; }
+  .chip.noimg { background:#2a1414; color:var(--red); border-color:#4a1f1f; }
+  .chip.done { background:#1f3a2e; color:var(--green); border-color:#2ea043; }
+  .chip.running { background:#13291f; color:var(--green); border-color:#1f4a33; }
+  .chip.paused { background:#2a2314; color:var(--yellow); border-color:#4a3a1f; }
+  .chip.topic { background:#1a1f2e; color:var(--purple); border-color:#2a2a4a; }
+
+  /* buttons */
+  .btn { background:var(--accent); color:#0d1117; border:none; padding:8px 16px; border-radius:5px; cursor:pointer; font-weight:600; font-size:13px; transition:opacity .12s; }
+  .btn:hover { opacity:.85; }
+  .btn.secondary { background:var(--panel2); color:var(--text); border:1px solid var(--border); }
+  .btn.danger { background:var(--red); color:#fff; }
+  .btn.success { background:var(--green); color:#0d1117; }
+  .btn.warning { background:var(--yellow); color:#0d1117; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .btn.sm { padding:5px 10px; font-size:12px; }
+
+  /* misc */
+  .empty { display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted); font-size:14px; flex-direction:column; gap:6px; }
+  .empty .hint { font-size:12px; }
+  .count { font-size:12px; color:var(--muted); padding:8px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; background:var(--panel); }
+  .toast { position:fixed; bottom:20px; right:20px; background:var(--panel); border:1px solid var(--border); padding:12px 18px; border-radius:6px; font-size:13px; z-index:1000; opacity:0; transition:opacity .3s; }
+  .toast.show { opacity:1; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:2000; }
+  .modal-content { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:24px; max-width:500px; width:90%; max-height:80vh; overflow:auto; }
+  .modal-content h3 { margin:0 0 12px; color:var(--accent); }
+  .modal-content .row { display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid var(--border); }
+  .modal-content .row:last-child { border:none; }
+  .modal-content .actions { margin-top:16px; display:flex; gap:8px; justify-content:flex-end; }
+  .check-result { margin-top:10px; font-size:12px; }
+  .check-item { padding:4px 0; display:flex; gap:8px; align-items:center; }
+  .check-item.pass { color:var(--green); }
+  .check-item.fail { color:var(--red); }
+  .hidden { display:none !important; }
+
+  /* loading spinner */
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 12px auto;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  #loadingStatus { text-align: center; min-height: 18px; }
+</style>
+</head>
+<body>
+<header id="header">
+  <h1>DevOps CTF</h1>
+  <span class="sub">Local Practice Lab</span>
+  <span class="status" id="status">loading...</span>
+</header>
+
+<!-- Page 1: Challenge Browser -->
+<div class="browser" id="pageBrowser">
+  <div class="filters">
+    <div class="row">
+      <input id="search" placeholder="Search challenges...">
+      <select id="kind"><option value="">All kinds</option><option>Terminal</option><option>Programming</option></select>
+      <select id="level"><option value="">All levels</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+    </div>
+    <div class="row">
+      <select id="topic"><option value="">All topics</option></select>
+      <select id="statusFilter"><option value="">All status</option><option value="todo">Not started</option><option value="done">Cleared</option><option value="paused">Paused</option></select>
+      <select id="imgFilter"><option value="">All images</option><option value="yes">Has image</option><option value="no">No image</option></select>
+    </div>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- Page 2: Challenge Workspace -->
+<div class="workspace hidden" id="pageWorkspace">
+  <div class="ws-left">
+    <div class="terminal-wrap"><div id="terminal"></div></div>
+    <div class="actions" id="actions"></div>
+    <div class="stats-bar" id="statsBar"></div>
+  </div>
+  <div class="ws-right">
+    <div class="sidebar-scroll" id="sidebar"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="modalContainer"></div>
+
+<script src="/lib/xterm.js"></script>
+<script src="/lib/xterm-addon-fit.js"></script>
+<script>
+const API = '';
+let challenges = [];
+let active = null;
+let term = null, fitAddon = null, ws = null;
+let keystrokes = 0, pasteCount = 0, startTime = null;
+let checkerEnabled = true;
+
+const DONE_KEY = 'ctf_done';
+function getDone(){ try { return JSON.parse(localStorage.getItem(DONE_KEY)||'[]'); } catch(e){ return []; } }
+function setDone(uuid, val){ const d=new Set(getDone()); if(val) d.add(uuid); else d.delete(uuid); localStorage.setItem(DONE_KEY, JSON.stringify([...d])); }
+function isDone(uuid){ return getDone().includes(uuid); }
+
+function initTerm() {
+  if (term) return;
+  term = new Terminal({ cursorBlink:true, fontSize:13, fontFamily:'Consolas, "Courier New", monospace', theme:{background:'#000', foreground:'#c9d1d9'} });
+  fitAddon = new FitAddon.FitAddon();
+  term.loadAddon(fitAddon);
+  term.open(document.getElementById('terminal'));
+  try { fitAddon.fit(); } catch(e) {}
+  window.addEventListener('resize', () => { try { if(fitAddon) fitAddon.fit(); } catch(e) {} });
+  let _keyGuard = false;
+  term.onData((data) => {
+    if (_keyGuard) return;
+    _keyGuard = true;
+    setTimeout(() => { _keyGuard = false; }, 0);
+    keystrokes++;
+    if (ws && ws.readyState === 1) ws.send(data);
+  });
+}
+
+async function loadChallenges() {
+  try {
+    const r = await fetch(API + '/api/challenges');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    challenges = data.challenges || [];
+    populateTopics();
+    renderGrid();
+    document.getElementById('status').textContent = challenges.length + ' challenges loaded';
+  } catch (e) {
+    document.getElementById('status').textContent = 'Error: ' + e.message;
+    console.error('loadChallenges failed:', e);
+  }
+}
+
+function populateTopics() {
+  const topics = new Set();
+  challenges.forEach(c => (c.topics||[]).forEach(t => topics.add(t)));
+  const sel = document.getElementById('topic');
+  [...topics].sort().forEach(t => { const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
+}
+
+function renderGrid() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const kind = document.getElementById('kind').value;
+  const lvl = document.getElementById('level').value;
+  const topic = document.getElementById('topic').value;
+  const st = document.getElementById('statusFilter').value;
+  const im = document.getElementById('imgFilter').value;
+  const filtered = challenges.filter(c =>
+    (!q || (c.title+' '+(c.desc||'')+' '+(c.topics||[]).join(' ')).toLowerCase().includes(q)) &&
+    (!kind || c.kind===kind) &&
+    (!lvl || c.level===lvl) &&
+    (!topic || (c.topics||[]).includes(topic)) &&
+    (!st || (st==='done'?c.cleared:(st==='paused'?c.status==='paused':c.status==='not_started'))) &&
+    (!im || (im==='yes'?c.has_image:!c.has_image))
+  );
+  document.getElementById('count').textContent = filtered.length + ' of ' + challenges.length;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (const c of filtered) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.onclick = () => openChallenge(c.uuid);
+    const done = c.cleared;
+    div.innerHTML =
+      '<div class="title">' + esc(c.title) + (done?' <span class="chip done">✓</span>':'') + '</div>' +
+      '<div class="meta">' +
+        '<span class="chip level-'+(c.level||'').toLowerCase()+'">'+(c.level||'')+'</span>' +
+        '<span class="chip kind">'+(c.kind||'')+'</span>' +
+        (c.has_image?'<span class="chip image">img</span>':'<span class="chip noimg">compose</span>') +
+        (c.running?'<span class="chip running">run</span>':'') +
+        (c.paused?'<span class="chip paused">paused</span>':'') +
+      '</div>' +
+      '<div class="topics">' + (c.topics||[]).slice(0,2).map(t=>'<span class="chip topic">'+esc(t)+'</span>').join('') +
+        ((c.topics||[]).length>2?'<span class="chip topic">+'+((c.topics||[]).length-2)+'</span>':'') + '</div>' +
+      '<div class="status-row"><span style="font-size:11px;color:var(--muted)">'+(c.time_limit||'')+'</span>' +
+        '<span style="font-size:11px;color:var(--muted)">'+(c.points||0)+' pts</span></div>';
+    grid.appendChild(div);
+  }
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function openChallenge(uuid) {
+  try {
+    active = challenges.find(c => c.uuid === uuid) || null;
+    keystrokes = 0; pasteCount = 0; startTime = Date.now();
+    const r = await fetch(API + '/api/challenges/' + uuid);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    active = await r.json();
+    checkerEnabled = (active.checker_enabled !== undefined) ? active.checker_enabled : true;
+    document.getElementById('pageBrowser').classList.add('hidden');
+    document.getElementById('pageWorkspace').classList.remove('hidden');
+    // back button
+    const h = document.getElementById('header');
+    if (!h.querySelector('.back')) {
+      const btn = document.createElement('button');
+      btn.className = 'back';
+      btn.textContent = '← Challenges';
+      btn.onclick = goBack;
+      h.insertBefore(btn, h.querySelector('.status'));
+    }
+    initTerm();
+    try { if (fitAddon) fitAddon.fit(); } catch(e) {}
+    renderSidebar();
+    renderActions();
+    renderStats();
+    updateTerminalStatus();
+    if (active.running) connectTerm();
+    else if (term) term.clear();
+  } catch (e) {
+    console.error('openChallenge failed:', e);
+    const sb = document.getElementById('sidebar');
+    if (sb) sb.innerHTML = '<div class="empty"><div>Error: ' + esc(e.message) + '</div></div>';
+    document.getElementById('pageBrowser').classList.add('hidden');
+    document.getElementById('pageWorkspace').classList.remove('hidden');
+  }
+}
+
+function addBackButton() {
+  const h = document.getElementById('header');
+  const btn = document.createElement('button');
+  btn.className = 'back';
+  btn.textContent = '← Challenges';
+  btn.onclick = goBack;
+  h.insertBefore(btn, h.querySelector('.status'));
+}
+
+function goBack() {
+  if (ws) { ws.close(); ws=null; }
+  document.getElementById('pageWorkspace').classList.add('hidden');
+  document.getElementById('pageBrowser').classList.remove('hidden');
+  const btn = document.querySelector('.back'); if(btn) btn.remove();
+  loadChallenges();
+}
+
+function renderSidebar() {
+  const d = active || {};
+  const done = !!d.cleared;
+  const sidebar = document.getElementById('sidebar');
+  var hintBody = esc(d.hint||'No hint available.');
+  if ((d.allowed_files||[]).length) {
+    hintBody += '<br><br><b style="color:var(--green)">Allowed to change:</b><br>' + (d.allowed_files||[]).map(function(f){ return '<span class="allowed">'+esc(f)+'</span>'; }).join('<br>');
+  }
+  if ((d.forbidden_files||[]).length) {
+    hintBody += '<br><br><b style="color:var(--red)">Must NOT change:</b><br>' + (d.forbidden_files||[]).map(function(f){ return '<span class="forbidden">'+esc(f)+'</span>'; }).join('<br>');
+  }
+  sidebar.innerHTML =
+    '<h2>' + esc(d.title || 'Unknown Challenge') + '</h2>' +
+    '<div class="meta">' +
+      '<span class="chip level-'+(d.level||'').toLowerCase()+'">'+(d.level||'')+'</span>' +
+      '<span class="chip kind">'+(d.kind||'')+'</span>' +
+      '<span>'+(d.time_limit||'')+'</span>' +
+      (d.has_image?'<span class="chip image">image ready</span>':'<span class="chip noimg">docker compose</span>') +
+      (d.running?'<span class="chip running">running</span>':'') +
+      (d.paused?'<span class="chip paused">paused</span>':'') +
+      (done?'<span class="chip done">cleared</span>':'') +
+    '</div>' +
+    '<div class="topics">' + (d.topics||[]).map(function(t){ return '<span class="chip topic">'+esc(t)+'</span>'; }).join('') + '</div>' +
+    acc('Scenario', renderScenario(d.scenario), true) +
+    acc('Objective', esc(d.objective), true) +
+    acc('Hint', hintBody, false) +
+    acc('How to solve (PoC)', esc(d.poc||'No solution available yet.'), false);
+}
+
+function renderScenario(scenario) {
+  const raw = (scenario || '');
+  // Remove 'Click to expand' and any embedded diagram text lines
+  const parts = raw.split('\n\nClick to expand');
+  let body = esc(parts[0].trim());
+  if (parts.length > 1) {
+    const detail = parts[1].trim().replace(/^\n+/, '');
+    if (detail) {
+      body += acc('Details', esc(detail), false);
+    }
+  }
+  return body;
+}
+
+function acc(title, body, open) {
+  return '<div class="accordion">' +
+    '<div class="acc-header" onclick="toggleAcc(this)">' + title + ' <span>'+ (open?'▲':'▼') +'</span></div>' +
+    '<div class="acc-body ' + (open?'open':'') + '">' + body + '</div>' +
+  '</div>';
+}
+
+function toggleAcc(el) {
+  const body = el.nextElementSibling;
+  body.classList.toggle('open');
+  el.querySelector('span').textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function renderActions() {
+  const d = active || {};
+  const running = !!d.running;
+  const paused = d.paused;
+  const hasImg = d.has_image;
+  const actions = document.getElementById('actions');
+  actions.innerHTML =
+    '<button class="btn secondary sm" onclick="goBack()">← Back</button>' +
+    (!hasImg
+      ? '<span style="font-size:12px;color:var(--red);margin-left:8px">No image — build docker compose first (see README)</span>'
+      : '') +
+    (hasImg && !running && !paused
+      ? '<button class="btn" onclick="confirmStart()">Start Machine</button>'
+      : '') +
+    (running && !paused
+      ? '<button class="btn secondary" onclick="pauseCh()">Pause</button>' +
+        '<button class="btn danger" onclick="stopCh()">Stop</button>'
+      : '') +
+    (paused
+      ? '<button class="btn warning" onclick="resumeCh()">Resume</button>'
+      : '') +
+    (running
+      ? '<button class="btn success" onclick="verifyCh()">Verify</button>' +
+        '<button class="btn danger" onclick="surrenderCh()">Surrender</button>'
+      : '') +
+    '<button class="btn secondary" onclick="resetCh()">Reset</button>' +
+    '<div class="checker-toggle">' +
+      '<span>Checker</span>' +
+      '<div class="toggle '+(checkerEnabled?'on':'')+'" id="checkerToggle" onclick="toggleChecker()"></div>' +
+      '<span id="checkerLabel">'+(checkerEnabled?'ON':'OFF')+'</span>' +
+    '</div>';
+}
+
+function renderStats() {
+  const d = active;
+  document.getElementById('statsBar').innerHTML =
+    'Points: <b>'+ (d.points||0) +'</b> &nbsp;|&nbsp; ' +
+    'Mode: <b>'+ (checkerEnabled?'ON (strict)':'OFF (practice)') +'</b> &nbsp;|&nbsp; ' +
+    'Paste: <b id="pasteCount">'+ pasteCount +'</b> &nbsp;|&nbsp; ' +
+    'WPM: <b id="wpmDisplay">0</b> &nbsp;|&nbsp; ' +
+    'Status: <b>'+ (d.status||'not_started') +'</b>';
+}
+
+function updateTerminalStatus() {
+  document.getElementById('status').textContent = active ? active.title + (active.running?' (running)':' (stopped)') : 'no challenge';
+}
+
+function confirmStart() {
+  if (!active) return;
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = '<div class="modal"><div class="modal-content">' +
+    '<h3>Start Machine?</h3>' +
+    '<div class="text" style="font-size:13px;margin-bottom:12px">This will start a Docker container for:<br><b>' + esc(active.title) + '</b></div>' +
+    '<div class="text" style="font-size:12px;color:var(--muted)">Image: ' + esc(active.image||'') + '<br>Port: ' + (active.port||'N/A') + '</div>' +
+    '<div class="actions">' +
+      '<button class="btn secondary" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn" onclick="closeModal(); startCh();">Start</button>' +
+    '</div></div></div>';
+}
+
+async function startCh() {
+  if (!active) return;
+  showLoading('Starting machine...');
+  try {
+    const r = await fetch(API+'/api/challenges/'+active.uuid+'/start', {method:'POST'});
+    const d = await r.json();
+    if (!r.ok) { toast(d.detail||'start failed'); return; }
+    active.running = true; active.paused = false; active.status = 'running';
+    await waitForContainerReady(active.uuid);
+    await refreshActive();
+    connectTerm();
+    toast('Challenge started');
+  } catch (e) {
+    toast('start failed: ' + e.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function waitForContainerReady(cid, maxAttempts=30) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    const r = await fetch(API+'/api/challenges/'+cid);
+    const d = await r.json();
+    if (d.running && (d.container_id || d.container)) return true;
+    if (d.status === 'error') throw new Error('Container failed to start');
+  }
+  throw new Error('Timeout waiting for container to start');
+}
+
+function showLoading(msg) {
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = '<div class="modal"><div class="modal-content">' +
+    '<h3>Starting Machine</h3>' +
+    '<div class="text" style="font-size:13px;margin-bottom:12px">' + esc(msg) + '</div>' +
+    '<div class="loading-spinner"></div>' +
+    '<div class="text" style="font-size:12px;color:var(--muted)" id="loadingStatus">Initializing...</div>' +
+    '</div></div>';
+}
+
+function hideLoading() {
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = '';
+}
+
+function updateLoadingStatus(msg) {
+  const el = document.getElementById('loadingStatus');
+  if (el) el.textContent = msg;
+}
+
+async function pauseCh() {
+  if (!active) return;
+  const r = await fetch(API+'/api/challenges/'+active.uuid+'/pause', {method:'POST'});
+  const d = await r.json();
+  if (!r.ok) { toast(d.detail||'pause failed'); return; }
+  active.running = false; active.paused = true; active.status = 'paused';
+  if (ws) { ws.close(); ws=null; }
+  await refreshActive();
+  toast('Paused');
+}
+
+async function resumeCh() {
+  if (!active) return;
+  const r = await fetch(API+'/api/challenges/'+active.uuid+'/resume', {method:'POST'});
+  const d = await r.json();
+  if (!r.ok) { toast(d.detail||'resume failed'); return; }
+  active.running = true; active.paused = false; active.status = 'running';
+  await refreshActive();
+  connectTerm();
+  toast('Resumed');
+}
+
+async function verifyCh() {
+  if (!active) return;
+  const elapsed = startTime ? (Date.now()-startTime)/1000 : 0;
+  const avgWpm = elapsed>0 ? (keystrokes/5)/(elapsed/60) : 0;
+  const fastestWpm = avgWpm; // simplified
+  const r = await fetch(API+'/api/challenges/'+active.uuid+'/verify', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({paste_count:pasteCount, keystroke_count:keystrokes, elapsed_sec:elapsed, avg_wpm:avgWpm, fastest_wpm:fastestWpm})
+  });
+  const d = await r.json();
+  if (!r.ok) { toast(d.detail||'verify failed'); return; }
+  showResultModal(d, 'cleared');
+  await refreshActive();
+  loadChallenges();
+}
+
+async function surrenderCh() {
+  if (!active) return;
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = '<div class="modal"><div class="modal-content">' +
+    '<h3>Surrender Challenge?</h3>' +
+    '<div class="text" style="font-size:13px;margin-bottom:12px">You will see the solution and your score will be recorded.</div>' +
+    '<div class="actions">' +
+      '<button class="btn secondary" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn danger" onclick="closeModal(); doSurrender();">Surrender</button>' +
+    '</div></div></div>';
+}
+
+async function doSurrender() {
+  if (!active) return;
+  const elapsed = startTime ? (Date.now()-startTime)/1000 : 0;
+  const avgWpm = elapsed>0 ? (keystrokes/5)/(elapsed/60) : 0;
+  const r = await fetch(API+'/api/challenges/'+active.uuid+'/surrender', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({paste_count:pasteCount, keystroke_count:keystrokes, elapsed_sec:elapsed, avg_wpm:avgWpm, fastest_wpm:avgWpm})
+  });
+  const d = await r.json();
+  if (!r.ok) { toast(d.detail||'surrender failed'); return; }
+  showResultModal(d, 'surrendered');
+  await refreshActive();
+  loadChallenges();
+}
+
+async function stopCh() {
+  if (!active) return;
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = '<div class="modal"><div class="modal-content">' +
+    '<h3>Stop Machine?</h3>' +
+    '<div class="text" style="font-size:13px;margin-bottom:12px">All unsaved data will be lost. The container will be stopped.</div>' +
+    '<div class="actions">' +
+      '<button class="btn secondary" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn danger" onclick="closeModal(); doStop();">Stop</button>' +
+    '</div></div></div>';
+}
+
+async function doStop() {
+  if (!active) return;
+  const r = await fetch(API+'/api/challenges/'+active.uuid+'/stop', {method:'POST'});
+  const d = await r.json();
+  if (!r.ok) { toast(d.detail||'stop failed'); return; }
+  active.running = false; active.paused = false; active.status = 'not_started';
+  if (ws) { ws.close(); ws=null; }
+  await refreshActive();
+  toast('Machine stopped');
+}
+
+async function resetCh() {
+  if (!active) return;
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = '<div class="modal"><div class="modal-content">' +
+    '<h3>Reset Challenge?</h3>' +
+    '<div class="text" style="font-size:13px;margin-bottom:12px">This will reset the challenge to its initial broken state. All your changes will be lost.</div>' +
+    '<div class="actions">' +
+      '<button class="btn secondary" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn danger" onclick="closeModal(); doReset();">Reset</button>' +
+    '</div></div></div>';
+}
+
+async function doReset() {
+  if (!active) return;
+  const r = await fetch(API+'/api/challenges/'+active.uuid+'/reset', {method:'POST'});
+  const d = await r.json();
+  if (!r.ok) { toast(d.detail||'reset failed'); return; }
+  keystrokes=0; pasteCount=0; startTime=Date.now();
+  active.running=true; active.paused=false; active.status='running';
+  await refreshActive();
+  if (ws) { ws.close(); ws=null; }
+  connectTerm();
+  toast('Reset done');
+}
+
+async function toggleChecker() {
+  if (!active) return;
+  checkerEnabled = !checkerEnabled;
+  await fetch(API+'/api/challenges/'+active.uuid+'/checker', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled:checkerEnabled})});
+  renderActions();
+  renderStats();
+  toast('Checker ' + (checkerEnabled?'ON':'OFF'));
+}
+
+async function refreshActive() {
+  const r = await fetch(API+'/api/challenges/'+active.uuid);
+  active = await r.json();
+  checkerEnabled = active.checker_enabled;
+  renderSidebar();
+  renderActions();
+  renderStats();
+  updateTerminalStatus();
+}
+
+function connectTerm() {
+  if (ws) { ws.close(); ws=null; }
+  if (!active) return;
+  initTerm();
+  try { fitAddon.fit(); } catch(e) {}
+  const proto = location.protocol==='https:'?'wss:':'ws:';
+  ws = new WebSocket(proto+'//'+location.host+'/ws/terminal/'+active.uuid);
+  ws.binaryType = 'arraybuffer';
+  ws.onopen = () => { term.clear(); term.writeln('Connected to '+active.title); fitAddon.fit(); };
+  ws.onmessage = (e) => {
+    if (e.data instanceof ArrayBuffer) term.write(new Uint8Array(e.data));
+    else term.write(e.data);
+  };
+  ws.onclose = () => term.writeln('\r\n[disconnected]');
+  term.onResize(({cols,rows}) => { if (ws && ws.readyState===1) ws.send(JSON.stringify({type:'resize',cols,rows})); });
+}
+
+function showResultModal(d, type) {
+  const container = document.getElementById('modalContainer');
+  const isCleared = type === 'cleared';
+  container.innerHTML = '<div class="modal"><div class="modal-content">' +
+    '<h3>' + (isCleared ? 'Challenge Cleared!' : 'Surrendered') + '</h3>' +
+    '<div class="row"><span>Points</span><span>'+d.points+'</span></div>' +
+    '<div class="row"><span>Mode</span><span>'+(d.checker_enabled?'Checker ON':'Checker OFF')+'</span></div>' +
+    '<div class="row"><span>Paste count</span><span>'+d.paste_count+'</span></div>' +
+    '<div class="row"><span>Avg WPM</span><span>'+ (d.avg_wpm||0).toFixed(1) +'</span></div>' +
+    '<div class="row"><span>Fastest WPM</span><span>'+ (d.fastest_wpm||0).toFixed(1) +'</span></div>' +
+    '<div class="row"><span>Completed without paste</span><span>'+ (d.no_paste?'Yes':'No') +'</span></div>' +
+    (d.checks_total ? '<div class="row"><span>Checks</span><span>'+d.checks_passed+'/'+d.checks_total+'</span></div>' : '') +
+    (d.poc ? '<div class="label">Solution (PoC)</div><div class="text" style="font-size:12px">'+esc(d.poc)+'</div>' : '') +
+    '<div class="actions">' +
+      '<button class="btn secondary" onclick="closeModal()">Close</button>' +
+      '<button class="btn" onclick="goBack()">Next Challenge</button>' +
+    '</div></div></div>';
+}
+
+function closeModal() { document.getElementById('modalContainer').innerHTML=''; }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// search/filter listeners
+['search','kind','level','topic','statusFilter','imgFilter'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(el.tagName==='INPUT'?'input':'change', renderGrid);
+});
+
+loadChallenges();
+
+// handle deep link
+const m = location.pathname.match(/\/challenge\/(.+)/);
+if (m) { openChallenge(m[1]); }
+</script>
+</body>
+</html>
